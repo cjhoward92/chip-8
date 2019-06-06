@@ -1,6 +1,8 @@
 #ifndef __CHIP_8__
 #define __CHIP_8__
 
+#include "stdhdr.h"
+
 // Globals
 #define TOTAL_MEMORY 4096
 #define GFX_MEMORY 64 * 32
