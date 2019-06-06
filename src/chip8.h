@@ -9,22 +9,7 @@
 #define REGISTER_COUNT 16
 #define STACK_COUNT 16
 #define KEY_COUNT 16
-
-typedef unsigned short op_code;
-typedef unsigned char memory;
-typedef unsigned char gfx_memory;
-
-typedef unsigned short i_reg;
-typedef unsigned short pc_reg;
-typedef unsigned char v_reg;
-
-typedef unsigned char delay_timer;
-typedef unsigned char sound_timer;
-
-typedef unsigned short stk_ptr;
-typedef unsigned short stack;
-
-typedef unsigned char key;
+#define FONT_SET 80
 
 // Fetch the opcode at the specified memory address
 #define FETCHOPCODE(mem, pc) mem[pc] << 8 | mem[pc + 1]
