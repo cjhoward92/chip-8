@@ -1,10 +1,12 @@
 #include "chip8.h"
 
+// Register values and other primitives
 static unsigned short pc = 0x200;
 static unsigned short opcode = 0;
 static unsigned short i_reg = 0;
 static unsigned short sp = 0;
 
+// General arrays (memory and such)
 static unsigned char v[REGISTER_COUNT];
 static unsigned char memory[TOTAL_MEMORY];
 static unsigned char chip8_fontset[FONT_SET];
@@ -12,9 +14,13 @@ static unsigned char gfx[GFX_MEMORY];
 static unsigned short stack[STACK_COUNT];
 static unsigned char key[KEY_COUNT];
 
+// Timers
 static unsigned char delay_timer;
 static unsigned char sound_timer;
 
+// Initializes the CHIP-8 inforamtion.
+// Plz call this once, and only once.
+// I guess I could add some checks for that...
 void chip8_init() {
     printf("INIT CHIP-8\n");
 
@@ -41,18 +47,27 @@ void chip8_init() {
     printf("CHIP-8 INIT COMPLETE\n");
 }
 
+// This is supposed to emulate the
+// CHIP-8 clock cycle. We will see
+// how well it actually works out...
 void chip8_emulate_cycle() {
     printf("CHIP-8 Emulation\n");
 }
 
+// Loads the specified binary into memory.
+// Right now this is constrained at
+// TOTAL_MEMEORY - 0x200 (512) bytes,
+// or 3584 bytes.
 int chip8_load_binary(const char *path) {
+    // Ain't no file, ain't my problem
     if (!path) {
         fprintf(stderr, "A path is required\n");
         return -1;
     }
 
+    // Let's open the file
     FILE *binary = fopen(path, "rb");
-    printf("Read binary at '%s'\n", path);
+    printf("Reading binary at '%s'\n", path);
 
     // Allocate the file to a new buffer
     unsigned char *buff = malloc(sizeof(unsigned char) * TOTAL_MEMORY);
@@ -63,9 +78,11 @@ int chip8_load_binary(const char *path) {
     }
     printf("Size of binary is %ld B\n", size);
 
+    // Copy binary to memory
     for (int i = 0; i < size; ++i)
         memory[i + (int)pc] = buff[i];
     
+    // Cleanup time
     free(buff);
     fclose(binary);
 
