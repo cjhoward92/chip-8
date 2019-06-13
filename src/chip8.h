@@ -25,4 +25,6 @@ void chip8_init();
 
 void chip8_emulate_cycle();
 
+int chip8_load_binary(const char *path);
+
 #endif
