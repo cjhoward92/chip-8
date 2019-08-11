@@ -400,7 +400,8 @@ static void exec_next_opcode() {
     
     // Let's immediately increment pc
     // so if we need to store it anywhere
-    // we can store the logical "next" opcode
+    // we can store the logical "next" opcode.
+    // This could lead to a subtle bug so test...
     pc += 2;
 
     switch (opcode & 0xF000)
