@@ -110,8 +110,8 @@ int chip8_load_binary(const char *path) {
     printf("Reading binary at '%s'\n", path);
 
     // Allocate the file to a new buffer
-    unsigned char *buff = malloc(sizeof(unsigned char) * TOTAL_MEMORY);
-    size_t size = fread(buff, 1, TOTAL_MEMORY, binary);
+    unsigned char *buff = malloc(sizeof(unsigned char) * (TOTAL_MEMORY - MEMORY_START));
+    size_t size = fread(buff, 1, TOTAL_MEMORY - MEMORY_START, binary);
     if (size <= 0) {
         fprintf(stderr, "Could not read binary\n");
         return -1;
@@ -157,6 +157,11 @@ static void op00EE_return() {
 }
 
 static void exec_0x0000_opcodes() {
+    if (!(opcode & 0xFFFF)) {
+        err_code = TERMINATE; // THIS IS TERMINATE FOR NOW
+        return;
+    }
+
     switch (opcode & 0x000F)
     {
     case 0x0:
@@ -360,6 +365,36 @@ static void exec_0x8000_opcodes() {
     }
 }
 
+// Check the inequality of vX and vY
+static void op9XY0_neqVXVY() {
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    // if vX != vY then skip the next instruction
+    if (v[regx] != v[regy])
+        pc += 2;
+}
+
+// Load NNN into I
+static void opANNN_load() {
+    i_reg = FETCH_NNN(opcode);
+}
+
+// JP v0 - Jump to the value NNN + v0
+static void opBNNN_jumpv0() {
+    unsigned short addr = FETCH_NNN(opcode);
+    pc = addr + v[0];
+}
+
+// set vX = RND & NN
+static void opCXNN_rnd() {
+    unsigned char x = FETCH_X(opcode);
+    unsigned short num = FETCH_NN(opcode);
+    unsigned short rnd = rand() & 0xFF;
+
+    v[x] = rnd & num;
+}
+
 static void exec_next_opcode() {
     // Let's first get the OpCode
     opcode = FETCHOPCODE(memory, pc);
@@ -400,12 +435,16 @@ static void exec_next_opcode() {
         exec_0x8000_opcodes();
         break;
     case 0x9000:
+        op9XY0_neqVXVY();
         break;
     case 0xA000:
+        opANNN_load();
         break;
     case 0xB000:
+        opBNNN_jumpv0();
         break;
     case 0xC000:
+        opCXNN_rnd();
         break;
     case 0xD000:
         break;
@@ -426,11 +465,16 @@ static void exec_next_opcode() {
 void chip8_emulate_cycle() {
     printf("CHIP-8 Emulation\n");
 
-    exec_next_opcode();
-    if (err_code) {
-        // TODO: print general error message?
-        return;
+    for(;;)
+    {
+        exec_next_opcode();
+        if (err_code) {
+            // TODO: print general error message?
+            return;
+        }
+
+        // Do timer stuff...
     }
 
-    // Do timer stuff...
+    // Free memory...
 }

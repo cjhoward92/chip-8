@@ -42,7 +42,8 @@
 enum ERR_CODES {
     INVALID_OPCODE = -1,
     NO_STACK_TO_UNWIND = -2,
-    STACK_OVERFLOW = -3,    
+    STACK_OVERFLOW = -3,
+    TERMINATE = 1, 
 };
 
 void chip8_init();
