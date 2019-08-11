@@ -21,7 +21,11 @@
 #define FETCHOPCODE(mem, pc) mem[pc] << 8 | mem[pc + 1]
 
 // Execute the opcode
-#define EXEC_MASK 0x0fff
+#define EXEC_MASK 0x0FFF
+
+// This is currently unused and is
+// an artifact of misunderstanding...
+// I might want to delete it...
 #define EXECOPCODE(reg, op, pc) {\
     reg = op & EXEC_MASK;\
     pc += 2;\

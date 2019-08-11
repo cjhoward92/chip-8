@@ -159,7 +159,6 @@ static void op00EE_return() {
 static void exec_0x0000_opcodes() {
     if (!(opcode & 0xFFFF)) {
         err_code = TERMINATE; // THIS IS TERMINATE FOR NOW
-        return;
     }
 
     switch (opcode & 0x000F)
@@ -399,11 +398,10 @@ static void exec_next_opcode() {
     // Let's first get the OpCode
     opcode = FETCHOPCODE(memory, pc);
     
-    // Immediately "execute" the OpCode
-    // so we can progress the program counter
-    // without worrying about it being
-    // incremented later...
-    EXECOPCODE(i_reg, opcode, pc);
+    // Let's immediately increment pc
+    // so if we need to store it anywhere
+    // we can store the logical "next" opcode
+    pc += 2;
 
     switch (opcode & 0xF000)
     {
