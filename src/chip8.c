@@ -173,7 +173,7 @@ static void exec_0x0000_opcodes() {
 
 // GOTO the address at NNN found in the OpCode
 static void op1NNN_goto() {
-    pc = opcode & 0x0FFF;
+    pc = FETCH_NNN(opcode);
 }
 
 // Call the subroutine at NNN found in the OpCode
@@ -186,31 +186,178 @@ static void op2NNN_call() {
     // Placing the current Program Counter
     // in the stack so we can retrieve it later
     stack[sp++] = pc;
-    pc = opcode & 0x0FFF;
+    pc = FETCH_NNN(opcode);
 }
 
+// Check the equality of vX and NN
 static void op3XNN_eqVXNN() {
-    // TODO: implement cond VX == NN
-    // Skips next instruction if VX == NN
+    unsigned char reg = FETCH_X(opcode);
+    unsigned char num = FETCH_NN(opcode);
+
+    // if vX == NN then skip an instruction
+    if (v[reg] == num)
+        pc += 2;
 }
 
+// Check the inequality of vX and NN
 static void op4XNN_neqVXNN() {
-    // TODO: implement cond VX != NN
-    // Skips next instruction if VX != NN
+    unsigned char reg = FETCH_X(opcode);
+    unsigned char num = FETCH_NN(opcode);
+
+    // if vX != NN then skip an instruction
+    if (v[reg] != num)
+        pc += 2;
 }
 
+// Check the equality of vX and vY
 static void op5XY0_eqVXVY() {
-    // TODO: implement cond VX == VY
-    // Skips next instruction if VX == VY
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    // if vX == vY then skip the next instruction
+    if (v[regx] == v[regy])
+        pc += 2;
 }
 
+// Set vX to the value NN
 static void op6XNN_set() {
-    // TODO: implement set VX to NN
+    unsigned char reg = FETCH_X(opcode);
+    unsigned char num = FETCH_NN(opcode);
+
+    v[reg] = num;
 }
 
+// Add the value NN to vX
 static void op7XNN_add() {
-    // TODO: implement add NN to VX
-    // No carry flag
+    unsigned char reg = FETCH_X(opcode);
+    unsigned char num = FETCH_NN(opcode);
+
+    v[reg] += num;
+}
+
+// Copy the value of vY into vX
+static void op8XY0_copy() {
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    v[regx] = v[regy];
+}
+
+// Bitwise OR against vX, vY with result stored in vX
+static void op8XY1_or() {
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    v[regx] |= v[regy];
+}
+
+// Bitwise AND against vX, vY with result stored in vX
+static void op8XY2_and() {
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    v[regx] &= v[regy];
+}
+
+// Bitwise XOR against vX, vY with result stored in vX
+static void op8XY3_xor() {
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    v[regx] ^= v[regy];
+}
+
+// Add vY to vX and set vF if there is a carry
+static void op8XY4_add_carry() {
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    unsigned short result = v[regx] + v[regy];
+    if (result & REQUIRES_CARRY)
+        v[FLAG_REG] = 1;
+    else
+        v[FLAG_REG] = 0;
+    
+    // We only want the lower byte
+    v[regx] = (result & 0x00FF);
+}
+
+// If vX > vY then set vF = 1, then subtract vY from vX
+static void op8XY5_sub_borrow() {
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    if (v[regx] > v[regy])
+        v[FLAG_REG] = 1;
+    else
+        v[FLAG_REG] = 0;
+    
+    v[regx] -= v[regy];
+}
+
+// Store LSB of vX in vF then shift right
+static void op8XY6_shr() {
+    unsigned char regx = FETCH_X(opcode);
+
+    v[FLAG_REG] = v[regx] & LSB;
+    v[regx] >>= 1;
+}
+
+// If vY > vX then set vF = 1, then subtract vX from vY
+static void op8XY7_rev_sub_borrow() {
+    unsigned char regx = FETCH_X(opcode);
+    unsigned char regy = FETCH_Y(opcode);
+
+    if (v[regy] > v[regx])
+        v[FLAG_REG] = 1;
+    else
+        v[FLAG_REG] = 0;
+    
+    v[regx] = v[regy] - v[regx];
+}
+
+// Store MSB of vX in vF then shift right
+static void op8XYE_shl() {
+    unsigned char regx = FETCH_X(opcode);
+
+    v[FLAG_REG] = v[regx] & MSB;
+    v[regx] <<= 1;
+}
+
+static void exec_0x8000_opcodes() {
+    switch (opcode & 0xF)
+    {
+    case 0x0:
+        op8XY0_copy();
+        break;
+    case 0x1:
+        op8XY1_or();
+        break;
+    case 0x2:
+        op8XY2_and();
+        break;
+    case 0x3:
+        op8XY3_xor();
+        break;
+    case 0x4:
+        op8XY4_add_carry();
+        break;
+    case 0x5:
+        op8XY5_sub_borrow();
+        break;
+    case 0x6:
+        op8XY6_shr();
+        break;
+    case 0x7:
+        op8XY7_rev_sub_borrow();
+        break;
+    case 0xE:
+        op8XYE_shl();
+        break;
+    default:
+        fail_opcode();
+        break;
+    }
 }
 
 static void exec_next_opcode() {
@@ -250,6 +397,7 @@ static void exec_next_opcode() {
         op7XNN_add();
         break;
     case 0x8000:
+        exec_0x8000_opcodes();
         break;
     case 0x9000:
         break;

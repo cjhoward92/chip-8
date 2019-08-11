@@ -1,10 +1,13 @@
 #include "chip8.h"
 
-int square(int num) {
-    unsigned short opcode = 0xAFFF;
-    unsigned short first = opcode & 0xF000;
-    printf("%u\n", first);
-    return 0;
+static void test() {
+    // unsigned short opcode = 0xAFFF;
+    // unsigned short first = opcode & 0xF000;
+    // printf("%u\n", first);
+    unsigned char x = 255;
+    unsigned char y = 10;
+    x += y;
+    printf("%hhu\n", x);
 }
 
 int main() {
@@ -13,7 +16,7 @@ int main() {
     //     return -1;
     // }
 
-    square(0);
+    test();
 
     printf("Hello, this is the chip8 emulator\n\n");
     return 0;
