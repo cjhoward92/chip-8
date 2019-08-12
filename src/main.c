@@ -1,3 +1,4 @@
+#include "input.h"
 #include "chip8.h"
 
 // static void test() {
@@ -16,10 +17,12 @@ int main() {
         return -1;
     }
 
-    chip8_emulate_cycle();
+    init_keyboard();
+
+    // chip8_run();
 
     // test();
 
-    printf("Hello, this is the chip8 emulator\n\n");
+    printf("emulation complete\n\n");
     return 0;
 }

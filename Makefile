@@ -5,10 +5,10 @@ IDIR=./$(SRCDIR)
 CC=gcc
 CFLAGS=-g -I$(IDIR) -Wall
 
-_DEPS=chip8.h stdhdr.h
+_DEPS=chip8.h stdhdr.h input.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ=chip8.o main.o
+_OBJ=chip8.o main.o input.o
 OBJ=$(patsubst %,$(OUTDIR)/%,$(_OBJ))
 
 $(OUTDIR)/chip8: $(OBJ)
