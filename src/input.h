@@ -7,6 +7,15 @@
 
 int init_keyboard();
 
+int shutdown_keyboard();
+
 unsigned char get_key();
+
+typedef struct c8_keyboard_t {
+    char* path;
+    char* name;
+    int device_fd;
+    struct c8_keyboard_t *next;
+} c8_keyboard_t;
 
 #endif

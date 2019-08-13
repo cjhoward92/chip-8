@@ -24,5 +24,6 @@ int main() {
     // test();
 
     printf("emulation complete\n\n");
+    shutdown_keyboard();
     return 0;
 }
